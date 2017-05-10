@@ -1,5 +1,19 @@
 //Funcion habilita el evento de drag an Drop y llama a las funciones de intercambio de fichas y comer fichas
 function dragDrop(){
+  $(".damaRoja").draggable({
+    revert: true,
+    containment: ".tablero",
+    start: function( event, ui ) {
+      dragDrop();
+    }
+  });
+  $(".damaAzul").draggable({
+    revert: true,
+    containment: ".tablero",
+    start: function( event, ui ) {
+      dragDrop();
+    }
+  });
   $(".fichaRoja").draggable({
     revert: true,
     containment: ".tablero",
@@ -20,90 +34,223 @@ function dragDrop(){
       var droppableId = $(this).attr("id");
       var draggableClass = ui.draggable.attr("class");
       var droppableClass = $(this).attr("class");
-      if(verificaMovimiento(draggableId,droppableId,draggableClass)){
-           $("#"+droppableId).switchClass( droppableClass, draggableClass, 300, "easeInOutQuad");
-           $("#"+draggableId).switchClass( draggableClass, droppableClass, 300, "easeInOutQuad");
-           verificaCorona(droppableId,droppableClass);
-           //deshabilita(draggableClass);
-         }
-       }
-     });
+      if(movimientoValido(draggableClass,droppableClass,draggableId,droppableId)){
+        mueveFicha(draggableId,droppableId,draggableClass,droppableClass);
+      }
+      coronaFicha(droppableId);
+    }
+  });
 }
-//funcion verifica si corona
-function verificaCorona(droppableId,droppableClass){
-  var suelto = parseInt(droppableId);
-  if(suelto>0 && suelto <9){
-    $("#"+droppableId).switchClass( droppableClass, "fichaDorada", 300, "easeInOutQuad");
-  }
-  if(suelto>64 && suelto <73){
-    $("#"+droppableId).switchClass( droppableClass, "fichaDorada", 300, "easeInOutQuad");
-  }
-}
-//funcion que verifica que los movimientos sean correctos
-function verificaMovimiento(draggableId,droppableId,draggableClass){
-  var sujetado = parseInt(draggableId);
-  var suelto = parseInt(droppableId);
+//cambia fichas
+function mueveFicha(draggableId,droppableId,draggableClass,droppableClass){
+
+  $("#"+droppableId).droppable("destroy");
+  $("#"+draggableId).draggable("destroy");
+  $("#"+droppableId).removeClass( droppableClass, 300, "easeInOutQuad");
+  $("#"+draggableId).removeClass( draggableClass, 300, "easeInOutQuad");
   if(draggableClass.includes("fichaRoja")){
-    if(suelto==(sujetado-9)){
-      if($("#"+(sujetado-9)).attr("class").includes("noFicha")){
-        return true;
-      }
-    }
-    if(suelto==(sujetado-7)){
-      if($("#"+(sujetado-7)).attr("class").includes("noFicha")){
-        return true;
-      }
-    }
-    if(suelto==(sujetado-18)){
-      if($("#"+(sujetado-9)).attr("class").includes("fichaAzul")){
-        var id = $("#"+(sujetado-9)).attr("id");
-        var clase = $("#"+(sujetado-9)).attr("class");
-        comeFicha(id,clase);
-        return true;
-      }
-    }
-    if(suelto==(sujetado-14)){
-      if($("#"+(sujetado-7)).attr("class").includes("fichaAzul")){
-        var id = $("#"+(sujetado-7)).attr("id");
-        var clase = $("#"+(sujetado-7)).attr("class")
-        comeFicha(id,clase);
-        return true;
-      }
-    }
+    $("#"+droppableId).addClass( "fichaRoja", 300, "easeInOutQuad");
+    $("#"+draggableId).addClass( "noFicha", 300, "easeInOutQuad");
   }
   if(draggableClass.includes("fichaAzul")){
-    if(suelto==(sujetado+9)){
-      if($("#"+(sujetado+9)).attr("class").includes("noFicha")){
-        return true;
-      }
-    }
-    if(suelto==(sujetado+7)){
-      if($("#"+(sujetado+7)).attr("class").includes("noFicha")){
-        return true;
-      }
-    }
-    if(suelto==(sujetado+18)){
-      if($("#"+(sujetado+9)).attr("class").includes("fichaRoja")){
-        var id = $("#"+(sujetado+9)).attr("id");
-        var clase = $("#"+(sujetado+9)).attr("class");
-        comeFicha(id,clase);
-        return true;
-      }
-    }
-    if(suelto==(sujetado+14)){
-      if($("#"+(sujetado+7)).attr("class").includes("fichaRoja")){
-        var id = $("#"+(sujetado+7)).attr("id");
-        var clase = $("#"+(sujetado+7)).attr("class");
-        comeFicha(id,clase);
-        return true;
-      }
-    }
+    $("#"+droppableId).addClass( "fichaAzul", 300, "easeInOutQuad");
+    $("#"+draggableId).addClass( "noFicha", 300, "easeInOutQuad");
   }
-  return false;
+  if(draggableClass.includes("damaAzul")){
+    $("#"+droppableId).addClass( "damaAzul", 300, "easeInOutQuad");
+    $("#"+draggableId).addClass( "noFicha", 300, "easeInOutQuad");
+  }
+  if(draggableClass.includes("damaRoja")){
+    $("#"+droppableId).addClass( "damaRoja", 300, "easeInOutQuad");
+    $("#"+draggableId).addClass( "noFicha", 300, "easeInOutQuad");
+  }
 }
-//Funcion que come fichas al saltar sobre ellas
-function comeFicha(id,clase){
-  $("#"+id).switchClass( clase,"noFicha", 200, "easeInOutQuad");
+//verifica si el movimiento es valido
+function movimientoValido(draggableClass,droppableClass,draggableId,droppableId){
+  if(droppableClass.includes("noFicha")){
+      var fichaSostenida = parseInt(draggableId);
+      var posicionSoltar = parseInt(droppableId);
+
+      if(draggableClass.includes("fichaRoja")){
+        //moviemiento normal
+        if(((posicionSoltar+7)==fichaSostenida)||((posicionSoltar+9)==fichaSostenida)){
+          return true;
+        }
+        //moviemiento captura
+        if((posicionSoltar+14)==fichaSostenida){
+          if(($("#"+(fichaSostenida-7)).attr("class")).includes("fichaAzul")){
+            comeFicha((fichaSostenida-7),"fichaAzul")
+            return true;
+          }
+          if(($("#"+(fichaSostenida-7)).attr("class")).includes("damaAzul")){
+            comeFicha((fichaSostenida-7),"damaAzul")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar+18)==fichaSostenida){
+
+          if(($("#"+(fichaSostenida-9)).attr("class")).includes("fichaAzul")){
+            comeFicha((fichaSostenida-9),"fichaAzul")
+            return true;
+          }
+          if(($("#"+(fichaSostenida-9)).attr("class")).includes("damaAzul")){
+            comeFicha((fichaSostenida-9),"damaAzul")
+            return true;
+          }
+        }
+      }
+
+      if(draggableClass.includes("fichaAzul")){
+        //moviemiento normal
+        if(((posicionSoltar-7)==fichaSostenida)||((posicionSoltar-9)==fichaSostenida)){
+          return true;
+        }
+        //moviemiento captura
+        if((posicionSoltar-14)==fichaSostenida){
+          if(($("#"+(fichaSostenida+7)).attr("class")).includes("fichaRoja")){
+            comeFicha((fichaSostenida+7),"fichaRoja")
+            return true;
+          }
+          if(($("#"+(fichaSostenida+7)).attr("class")).includes("damaRoja")){
+            comeFicha((fichaSostenida+7),"damaRoja")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar-18)==fichaSostenida){
+          if(($("#"+(fichaSostenida+9)).attr("class")).includes("fichaRoja")){
+            comeFicha((fichaSostenida+9),"fichaRoja")
+            return true;
+          }
+          if(($("#"+(fichaSostenida+9)).attr("class")).includes("damaRoja")){
+            comeFicha((fichaSostenida+9),"damaRoja")
+            return true;
+          }
+        }
+      }
+      if(draggableClass.includes("damaRoja")){
+        //moviemiento normal
+        if(((posicionSoltar+7)==fichaSostenida)||((posicionSoltar-7)==fichaSostenida)||((posicionSoltar+9)==fichaSostenida)||((posicionSoltar-9)==fichaSostenida)){
+          return true;
+        }
+        //moviemiento captura
+        if((posicionSoltar-14)==fichaSostenida){
+          if(($("#"+(fichaSostenida+7)).attr("class")).includes("fichaAzul")){
+            comeFicha((fichaSostenida+7),"fichaAzul")
+            return true;
+          }
+          if(($("#"+(fichaSostenida+7)).attr("class")).includes("damaAzul")){
+            comeFicha((fichaSostenida+7),"damaAzul")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar-18)==fichaSostenida){
+          if(($("#"+(fichaSostenida+9)).attr("class")).includes("fichaAzul")){
+            comeFicha((fichaSostenida+9),"fichaAzul")
+            return true;
+          }
+          if(($("#"+(fichaSostenida+9)).attr("class")).includes("damaAzul")){
+            comeFicha((fichaSostenida+9),"damaAzul")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar+14)==fichaSostenida){
+          if(($("#"+(fichaSostenida-7)).attr("class")).includes("fichaAzul")){
+            comeFicha((fichaSostenida-7),"fichaAzul")
+            return true;
+          }
+          if(($("#"+(fichaSostenida-7)).attr("class")).includes("damaAzul")){
+            comeFicha((fichaSostenida-7),"damaAzul")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar+18)==fichaSostenida){
+          if(($("#"+(fichaSostenida-9)).attr("class")).includes("fichaAzul")){
+            comeFicha((fichaSostenida-9),"fichaAzul")
+            return true;
+          }
+          if(($("#"+(fichaSostenida-9)).attr("class")).includes("damaAzul")){
+            comeFicha((fichaSostenida-9),"damaAzul")
+            return true;
+          }
+        }
+      }
+      if(draggableClass.includes("damaAzul")){
+        //moviemiento normal
+        if(((posicionSoltar+7)==fichaSostenida)||((posicionSoltar-7)==fichaSostenida)||((posicionSoltar+9)==fichaSostenida)||((posicionSoltar-9)==fichaSostenida)){
+          return true;
+        }
+        //moviemiento captura
+        if((posicionSoltar-14)==fichaSostenida){
+          if(($("#"+(fichaSostenida+7)).attr("class")).includes("fichaRoja")){
+            comeFicha((fichaSostenida+7),"fichaRoja")
+            return true;
+          }
+          if(($("#"+(fichaSostenida+7)).attr("class")).includes("damaRoja")){
+            comeFicha((fichaSostenida+7),"damaRoja")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar-18)==fichaSostenida){
+          if(($("#"+(fichaSostenida+9)).attr("class")).includes("fichaRoja")){
+            comeFicha((fichaSostenida+9),"fichaRoja")
+            return true;
+          }
+          if(($("#"+(fichaSostenida+9)).attr("class")).includes("damaRoja")){
+            comeFicha((fichaSostenida+9),"damaRoja")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar+14)==fichaSostenida){
+          if(($("#"+(fichaSostenida-7)).attr("class")).includes("fichaRoja")){
+            comeFicha((fichaSostenida-7),"fichaRoja")
+            return true;
+          }
+          if(($("#"+(fichaSostenida-7)).attr("class")).includes("damaRoja")){
+            comeFicha((fichaSostenida-7),"damaRoja")
+            return true;
+          }
+        }
+        //moviemiento captura
+        if((posicionSoltar+18)==fichaSostenida){
+          if(($("#"+(fichaSostenida-9)).attr("class")).includes("fichaRoja")){
+            comeFicha((fichaSostenida-9),"fichaRoja")
+            return true;
+          }
+          if(($("#"+(fichaSostenida-9)).attr("class")).includes("damaRoja")){
+            comeFicha((fichaSostenida-9),"damaRoja")
+            return true;
+          }
+        }
+      }
+  }else{
+    return false;
+  }
+}
+//funcion conquisa ficha
+function comeFicha(Id,Clase){
+  $("#"+Id).draggable("destroy");
+  $("#"+Id).removeClass( Clase, 300, "easeInOutQuad");
+  $("#"+Id).addClass( "noFicha", 300, "easeInOutQuad");
+}
+//funcion que corona
+function coronaFicha(Id){
+  if(Id>0 && Id <9){
+    $("#"+Id).removeClass("fichaRoja", 300, "easeInOutQuad");
+    $("#"+Id).addClass( "damaRoja", 300, "easeInOutQuad");
+    //$("#"+Id).draggable("destroy");
+  }
+  if(Id>65 && Id <72){
+    $("#"+Id).removeClass( "fichaAzul", 300, "easeInOutQuad");
+    $("#"+Id).addClass( "damaAzul", 300, "easeInOutQuad");
+    //$("#"+Id).draggable("destroy");
+  }
 }
 //funcion que da control sobre las fichas a un jugador a la vez
 function deshabilita(draggableClass){
@@ -116,6 +263,7 @@ function deshabilita(draggableClass){
     $(".fichaAzul").draggable('disable');
   }
 };
+
 //funcion que incializa el proces
 $( document ).ready(function() {
   console.log( "document loaded" );
