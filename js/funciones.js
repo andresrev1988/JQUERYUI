@@ -23,10 +23,21 @@ function dragDrop(){
       if(verificaMovimiento(draggableId,droppableId,draggableClass)){
            $("#"+droppableId).switchClass( droppableClass, draggableClass, 300, "easeInOutQuad");
            $("#"+draggableId).switchClass( draggableClass, droppableClass, 300, "easeInOutQuad");
-           deshabilita(draggableClass);
+           verificaCorona(droppableId,droppableClass);
+           //deshabilita(draggableClass);
          }
        }
      });
+}
+//funcion verifica si corona
+function verificaCorona(droppableId,droppableClass){
+  var suelto = parseInt(droppableId);
+  if(suelto>0 && suelto <9){
+    $("#"+droppableId).switchClass( droppableClass, "fichaDorada", 300, "easeInOutQuad");
+  }
+  if(suelto>64 && suelto <73){
+    $("#"+droppableId).switchClass( droppableClass, "fichaDorada", 300, "easeInOutQuad");
+  }
 }
 //funcion que verifica que los movimientos sean correctos
 function verificaMovimiento(draggableId,droppableId,draggableClass){
