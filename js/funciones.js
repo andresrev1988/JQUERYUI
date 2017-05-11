@@ -38,6 +38,7 @@ function dragDrop(){
         mueveFicha(draggableId,droppableId,draggableClass,droppableClass);
       }
       coronaFicha(droppableId);
+      finDeJuego();
     }
   });
 }
@@ -263,6 +264,33 @@ function deshabilita(draggableClass){
     $(".fichaAzul").draggable('disable');
   }
 };
+//chequea fin de juego
+function finDeJuego(){
+  var flagAzul =false;
+  var flagRoja =false;
+  for (var i=1; i<73; i++){
+    if(!$("#"+i).hasClass("fichaRoja")){      
+      flagRoja=true;
+    }else {
+      flagRoja=false;
+      break;
+    }
+  }
+  for (var i=1; i<73; i++){
+      if(!$("#"+i).hasClass("fichaAzul")){
+        flagAzul=true;
+      }else {
+        flagAzul=false;
+        break;
+      }
+    }
+    if(flagAzul){
+      alert("GANADOR FICHAS ROJAS")
+    }
+    if(flagRoja){
+      alert("GANADOR FICHAS AZUL")
+    }
+  }
 
 //funcion que incializa el proces
 $( document ).ready(function() {
